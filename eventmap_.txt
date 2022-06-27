@@ -1,0 +1,226 @@
+# Event ID Mapping file
+#
+# ref: http://support.microsoft.com/kb/2157973
+#      http://support.microsoft.com/kb/977519
+Microsoft-Windows-Security-Auditing/4625:[Failed Login]
+Microsoft-Windows-Security-Auditing/1102:[Log Cleared]
+
+# https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=5140
+Microsoft-Windows-Security-Auditing/5140:[Network share object accessed]
+Microsoft-Windows-Security-Auditing/5142:[Network share object added]
+Microsoft-Windows-Security-Auditing/5143:[Network share object modified]
+Microsoft-Windows-Security-Auditing/5144:[Network share object deleted]
+Microsoft-Windows-Security-Auditing/5168:[SPN check for SMB/SMB2 failed]
+
+Microsoft-Windows-Security-Auditing/4674:[Priv_Obj_Attempt]
+Microsoft-Windows-Security-Auditing/4799:[ALERT - Enumeration]
+
+# use of explicit credentials 
+# https://medium.com/@imphash/detecting-lateral-movement-101-tracking-movement-smb-windows-admin-shares-through-windows-log-6005e3ba6980
+Microsoft-Windows-Security-Auditing/4648:[T1021.002]
+
+# Attempt to exploit CVE-2020-0601
+# https://blog.didierstevens.com/2020/01/15/using-cveeventwrite-from-vba-cve-2020-0601/
+# https://isc.sans.edu/forums/diary/CVE20200601+Followup/25714/
+Audit-CVE/1:[ALERT]
+Microsoft-Windows-Audit-CVE/1:[ALERT]
+
+# https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4905
+Microsoft-Windows-Security-Auditing/4905:[ALERT: Attempt to unregister security event source]
+
+# https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventid=5379
+Microsoft-Windows-Security-Auditing/5379:[Credential Manager Credentials Read]
+
+# https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventid=5382
+Microsoft-Windows-Security-Auditing/5382:[Vault Credentials Read]
+Microsoft-Windows-Security-Auditing/5381:[Vault Credentials Read]
+
+#
+# 
+# https://www.microsoft.com/technet/support/ee/transform.aspx?ProdName=Windows%20Operating%20System&ProdVer=5.2&EvtID=63&EvtSrc=WinMgmt&LCID=1033
+WinMgmt/63:[ALERT]
+
+#
+# ref: http://technet.microsoft.com/en-us/library/ee891289(v=ws.10).aspx
+# ref: http://technet.microsoft.com/en-us/library/ee891242(v=ws.10)
+Microsoft-Windows-TerminalServices-LocalSessionManager/21:[Session Logon]
+Microsoft-Windows-TerminalServices-LocalSessionManager/23:[Session Logoff]
+Microsoft-Windows-TerminalServices-LocalSessionManager/24:[Session Disconnect]
+Microsoft-Windows-TerminalServices-LocalSessionManager/1101:[Logon]
+Microsoft-Windows-TerminalServices-LocalSessionManager/1103:[Logoff]
+Microsoft-Windows-TerminalServices-LocalSessionManager/25:[Session Reconnect]
+Microsoft-Windows-TerminalServices-LocalSessionManager/1105:[Reconnect]
+Microsoft-Windows-TerminalServices-LocalSessionManager/22:[Shell Start]
+Microsoft-Windows-TerminalServices-LocalSessionManager/1102:[Shell Start]
+
+Microsoft-Windows-Winlogon/7001:[Logon]
+Microsoft-Windows-Winlogon/7002:[Logoff]
+Winlogon/4101:[License Val.]
+
+Microsoft-Windows-Security-Auditing/4624:[Logon]
+ 
+# http://technet.microsoft.com/en-us/library/cc734130%28v=ws.10%29.aspx  
+# http://blogs.msdn.com/b/patricka/archive/2010/04/27/what-is-interactive-services-detection-and-why-is-it-blinking-at-me.aspx
+# http://blogs.msdn.com/b/patricka/archive/2011/03/14/troubleshooting-interactive-services-detection.aspx
+Interactive Services detection/1000:[ALERT]
+
+# http://technet.microsoft.com/en-us/library/cc756342%28v=ws.10%29.aspx
+# Service timed out waiting for resources
+Service Control Manager/7009:[ALERT]
+# Service installed
+Service Control Manager/7045:[ALERT]
+
+# http://technet.microsoft.com/en-us/library/cc756339%28v=ws.10%29.aspx
+Service Control Manager/7030:[ALERT]
+
+# Cred theft, via Quark's pwdump
+ESENT/102:[ALERT]
+# http://www.microsoft.com/technet/support/ee/transform.aspx?ProdName=Windows%20Operating%20System&ProdVer=5.2&EvtID=102&EvtSrc=ESENT&LCID=1033
+# Look for "QUARKS-K0DE" in strings of event record
+ESENT/103:[ALERT]
+# http://www.microsoft.com/technet/support/ee/transform.aspx?ProdName=Windows+Operating+System&ProdVer=5.2&EvtID=103&EvtSrc=ESENT&LCID=1033
+
+# Seen associated with some Poweliks variants
+# http://www.microsoft.com/technet/support/ee/transform.aspx?ProdName=Windows+Operating+System&ProdVer=5.2&EvtID=10010&EvtSrc=DCOM&LCID=1033
+DCOM/10010:[ALERT]
+
+# http://technet.microsoft.com/en-us/library/dd315533(v=ws.10).aspx
+Microsoft-Windows-TaskScheduler/102:[Job Success]
+Microsoft-Windows-TaskScheduler/106:[Task Reg]
+# https://technet.microsoft.com/en-us/library/dd363721%28v=ws.10%29.aspx
+Microsoft-Windows-TaskScheduler/110:[Task Run]
+
+Microsoft-Windows-TaskScheduler/201:[Action Success]
+
+Microsoft-Windows-TaskScheduler/140:[Task Mod]
+Microsoft-Windows-TaskScheduler/141:[Task Del]
+
+# TaskScheduler backward compatibility
+# Saw a bad guy create a SchedTask for a long-running process (RAT), then deleted the task after it was running.
+# Almost exactly 72 hrs later, the TaskScheduler balked and generated a 7xx level event record, stating that it 
+# couldn't update the backward compatible .job file
+#
+# https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/dd315682(v%3dws.10)
+Microsoft-Windows-TaskScheduler/709:[Task BKWD]
+Microsoft-Windows-TaskScheduler/706:[Task BKWD]
+
+# Added based on threat actor activity
+# https://technet.microsoft.com/en-us/library/cc774959(v=ws.10).aspx
+Microsoft-Windows-TaskScheduler/706:[Task Update FAIL]
+# https://technet.microsoft.com/en-us/library/cc775037(v=ws.10).aspx
+Microsoft-Windows-TaskScheduler/329:[Task Timeout]
+
+# Malware Detection
+Microsoft-Windows-DNS-Client/1014:[Name Resolution Timeout]
+
+Symantec Endpoint Protection Client/51:[MalDetect]
+Symantec AntiVirus/51:[MalDetect]
+Symantec Network Protection/400:[MalDetect]
+McLogEvent/257:[MalDetect]
+
+# https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-antivirus/troubleshoot-windows-defender-antivirus
+Microsoft Antimalware/1116:[MalDetect]
+Microsoft-Windows-Windows Defender/1116:[MalDetect]
+Microsoft-Windows-Windows Defender/1117:[MalDetect]
+Microsoft-Windows-Windows Defender/3004:[MalDetect]
+
+# Source: Microsoft-Windows-TerminalServices-RemoteConnectionManager
+# ref: http://technet.microsoft.com/en-us/library/cc775119(v=ws.10)
+Microsoft-Windows-TerminalServices-RemoteConnectionManager/1146:[Session Start]
+# https://technet.microsoft.com/en-us/library/ee891219%28v=ws.10%29.aspx
+Microsoft-Windows-TerminalServices-RemoteConnectionManager/1147:[Logon]
+Microsoft-Windows-TerminalServices-RemoteConnectionManager/1149:[Logon]
+
+
+# https://technet.microsoft.com/en-us/library/cc734254(v=ws.10).aspx
+# Note: this event has been observed when ransomware attempts to delete 
+#   VSCs, but infected user profile does not have necessary privileges.
+# Record Data contains command, encoded as hex (conver to ASCII)
+VSS/13:[VSS Fail]
+
+VSS/8224:[VSS Shutdown]
+VSS/8225:[VSS Shutdown via SCM]
+# 
+# Source: microsoft-windows-user profiles service
+# Event ID: 1530
+# ref: http://support.microsoft.com/kb/947238
+#
+# Source: microsoft-windows-user profiles service
+# Event ID: 1511,1534
+# ref: http://support.microsoft.com/kb/940453
+Microsoft-Windows-User Profiles Service/2:[Logon]
+Microsoft-Windows-User Profiles Service/4:[Logoff]
+Microsoft-Windows-Kernel-General/1:[Time change]
+Microsoft-Windows-Kernel-General/13:[Shutdown]
+Microsoft-Windows-Kernel-General/12:[System Start]
+Microsoft-Windows-Kernel-Power/42:[System Sleep]
+
+TermService/1012:[# Failed Logons]
+TermDD/50:[RDP Prot Error]
+
+EventLog/6005:[System Start]
+EventLog/6009:[System Start]
+EventLog/6006:[Shutdown]
+USER32/1074:[Shutdown]
+EventLog/6013:[Uptime]
+UserPNP/2001:[Service/Device added]
+UserPNP/2003:[Service/Device added]
+DriverFrameworks-UserMode/10000:[Driver Installed]
+#
+#ref: http://technet.microsoft.com/en-us/library/dd380071(v=ws.10).aspx
+WLAN-AutoConfig/8000:[WAP Connection]
+WLAN-AutoConfig/8001:[WAP Connection]
+WLAN-AutoConfig/8002:[WAP Connect Fail]
+NetworkProfile/1000:[Connected to Network]
+NetworkProfile/1001:[Disconnected from Network]
+VHDMP/1:[VHD Mount]
+VHDMP/2:[VHD Unmount]
+Virtual PC/1002:[App Launch]
+Virtual PC/80:[XPMode Started]
+Microsoft-Windows-Application-Experience/905:[Program Updated]
+Microsoft-Windows-Application-Experience/903:[Program Installed]
+Microsoft-Windows-Application-Experience/904:[Program Installed]
+Microsoft-Windows-Application-Experience/907:[Program Removed]
+Microsoft-Windows-Application-Experience/908:[Program Removed]
+DriverFrameworks-UserMode/2003:[Connected Device]
+DriverFrameworks-UserMode/2004:[Connected Device]
+DateTimeControlPanel/2000:[System Time Set]
+
+# ref: http://technet.microsoft.com/en-us/library/cc735584(v=ws.10).aspx
+MsiInstaller/11724:[App Removal]
+MsiInstaller/11707:[Product Install]
+MsiInstaller/1033:[Product Install]
+MsiInstaller/1034:[Product Removed]
+
+#
+# Other References:
+#  http://support.microsoft.com/kb/947226
+#
+# Source: Microsoft-Windows-RestartManager
+# http://technet.microsoft.com/en-us/library/cc774719(v=ws.10)
+#
+# Events and Errors
+# http://technet.microsoft.com/en-us/library/cc754424(v=ws.10)
+#
+# Win7/Win2008 R2 Security Audit Events
+# http://www.microsoft.com/en-us/download/details.aspx?id=21561
+#
+# Source: Microsoft-Windows-TerminalServices-PnPDevices
+# Event ID: 32-37
+# http://technet.microsoft.com/en-us/library/cc775185(v=ws.10)
+#
+# Source: Microsoft-Windows-TerminalServices-RemoteConnectionManager
+# http://technet.microsoft.com/en-us/library/cc775119(v=ws.10)
+#
+# Source: USER32
+# Event ID: 1074
+# http://www.microsoft.com/technet/support/ee/transform.aspx?ProdName=
+#  Windows+Operating+System&ProdVer=5.2&EvtID=1074&EvtSrc=User32&LCID=1033
+#
+# Source: TermServ
+# Event ID: 1012
+# Session disconnect due to # failed logon attempts
+# http://technet.microsoft.com/en-us/library/cc775156(v=ws.10).aspx
+#
+# Microsoft-Windows-GroupPolicy
+# http://technet.microsoft.com/en-us/library/cc749336(v=ws.10).aspx
