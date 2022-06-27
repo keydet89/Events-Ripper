@@ -1,6 +1,6 @@
 #! c:\perl\bin\perl.exe
 #-------------------------------------------------------------------------
-# ERip - Event Ripper
+# ERip - Events Ripper
 # Use this utility to run a plugins file or a single plugin against a Reg
 # hive file.
 # 
@@ -181,8 +181,8 @@ Parse timeline-format events file
   -c ................Output list in CSV format (use with -l)
   -h.................Help (print this information)
   
-Ex: C:\\>erip -f c:\\case\\events.txt -f system
-    C:\\>erip -r c:\\case\\events.txt -p failedlogins
+Ex: C:\\>erip -f c:\\case\\events.txt -a
+    C:\\>erip -f c:\\case\\events.txt -p failedlogins
     C:\\>erip -l -c
 
 All output goes to STDOUT; use redirection (ie, > or >>) to output to a file\.
