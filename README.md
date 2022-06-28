@@ -15,18 +15,49 @@
 # Premise
   Events-Ripper is built on several core ideas:
   
-  1. Windows Event Log records are best described as an event source/ID pair. This is due to the fact that 
+  1. Windows Event Logs are retrieved from acquired images, or from "triage" activities. Regardless of 
+     how they're retrieved, Windows Event Logs are available.
+  
+  2. Windows Event Log records are best described as an event source/ID pair. This is due to the fact that 
      event IDs are not unique; a single event ID can apply to several different events.
 	 
-  2. Something learned on one engagement or during one incident may likely be extremely useful during a 
+  3. Something learned on one engagement or during one incident may likely be extremely useful during a 
      future incident.
 	 
-  3. Much more data is available than is often thought from various data sources, especially the Windows 
+  4. Much more data is available than is often thought from various data sources, especially the Windows 
      Event Log.
   
 # Installation   
   To "install" Events-Ripper, simply download and extract all files to a folder, ensuring that "plugins"
   remains a subfolder.
+  
+# Windows Event Logs
+  Value extracted from Windows Event Logs (and subsequently, the events file) is heavily dependent upon 
+  the Windows version, audit configuration, software load, etc., of the system from which the Windows 
+  Event Logs are retrieved.
+  
+  At the time of this writing (as of 28 Jun 2022), the current plugins extract value from the following 
+  Windows Event Logs:
+  
+  Security.evtx
+  System.evtx
+  Application.evtx
+  Microsoft-Windows-Windows Defender%4Operational.evtx
+  Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational.evtx
+  
+  As new challenges are surfaced and new plugins are created to address those challenges, value can be 
+  derived from:
+  
+  Microsoft-Windows-User Profile Service%4Operational.evtx
+  Microsoft-Windows-NetworkProfile%4Operational.evtx
+  Microsoft-Windows-Shell-Core%4Operational.evtx
+  
+  Further, Windows Event Logs can provide insight into devices connected to a Windows system, per:
+  
+  http://windowsir.blogspot.com/2022/05/usb-devices-redux.html
+  
+  In short, any Windows Event Log that includes records that can provide value can be included, and plugins
+  written to extract or derive that value.
   
 # Usage
   To use Events-Ripper, start by creating the events file. Copy/extract Windows Event Log *.evtx files to a
