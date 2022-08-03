@@ -2,7 +2,11 @@
 # sessions.pl
 # parse login/logoff events to get session info
 #
+# To be clear, this plugin works by tracking login/logoff events based on the unique login 
+# session ID.
+#
 # Change history:
+#   20220803 - updated duration output
 #   20220802 - created
 #
 # References:
@@ -14,7 +18,7 @@
 package sessions;
 use strict;
 
-my %config = (version       => 20220802,
+my %config = (version       => 20220803,
               category      => "",
               MITRE         => "");
 
@@ -84,7 +88,7 @@ sub pluginmain {
 			if (exists $sess{$i}{logon_time} && exists $sess{$i}{logoff_time}) {
 #				print "ID  : ".$i."\n";
 				next if ($sess{$i}{logon_user} =~ m/\$$/);
-				printf "%-25s %-40s %-4s %-10s\n",::format8601Date($sess{$i}{logon_time})."Z", $sess{$i}{logon_user},$sess{$i}{logon_type},($sess{$i}{logoff_time} - $sess{$i}{logon_time})." sec";
+				printf "%-25s %-40s %-4s %-10s\n",::format8601Date($sess{$i}{logon_time})."Z", $sess{$i}{logon_user},$sess{$i}{logon_type},parse_duration($sess{$i}{logoff_time} - $sess{$i}{logon_time});
 			}
 		}
 	}
@@ -94,4 +98,14 @@ sub pluginmain {
 	}
 	
 }
+
+# found this code on PerlMonks
+sub parse_duration {
+	my $seconds = shift;
+	my $hours = int($seconds/(60*60));
+	my $mins  = ($seconds/60)%60;
+	my $secs  = $seconds % 60;
+	return sprintf ("%02d:%02d:%02d",$hours,$mins,$secs);
+}
+	
 1;
