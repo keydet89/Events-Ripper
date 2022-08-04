@@ -6,6 +6,7 @@
 # session ID.
 #
 # Change history:
+#   20220804 - changed output to print times sorted
 #   20220803 - updated duration output
 #   20220802 - created
 #
@@ -18,7 +19,7 @@
 package sessions;
 use strict;
 
-my %config = (version       => 20220803,
+my %config = (version       => 20220804,
               category      => "",
               MITRE         => "");
 
@@ -39,6 +40,7 @@ sub pluginmain {
 	print "\n";
 	
 	my %sess = ();
+	my %list = ();
 	
 	open(FH,'<',$file);
 	while (<FH>) {
@@ -83,19 +85,40 @@ sub pluginmain {
 	close(FH);
 	
 	if (scalar (keys %sess) > 0) {
-		printf "%-25s %-40s %-4s %-10s\n","Login Time","User","Type","Duration";
+		
 		foreach my $i (keys %sess) {
 			if (exists $sess{$i}{logon_time} && exists $sess{$i}{logoff_time}) {
-#				print "ID  : ".$i."\n";
 				next if ($sess{$i}{logon_user} =~ m/\$$/);
-				printf "%-25s %-40s %-4s %-10s\n",::format8601Date($sess{$i}{logon_time})."Z", $sess{$i}{logon_user},$sess{$i}{logon_type},parse_duration($sess{$i}{logoff_time} - $sess{$i}{logon_time});
+				push(@{$list{$sess{$i}{logon_time}}},$sess{$i}{logon_user}."|".$sess{$i}{logon_type}."|".parse_duration($sess{$i}{logoff_time} - $sess{$i}{logon_time}));
 			}
 		}
+		
+		printf "%-25s %-40s %-4s %-10s\n","Login Time","User","Type","Duration";
+		foreach my $n (sort {$a <=> $b} keys %list) {
+			foreach my $x (@{$list{$n}}) {
+				my @str = split(/\|/,$x);
+#				print $n." - ".$x."\n";
+				printf "%-25s %-40s %-4s %-10s\n",::format8601Date($n)."Z", $str[0],$str[1],$str[2];
+			}
+		}
+		
+#		printf "%-25s %-40s %-4s %-10s\n","Login Time","User","Type","Duration";
+#		foreach my $i (keys %sess) {
+#			if (exists $sess{$i}{logon_time} && exists $sess{$i}{logoff_time}) {
+#				print "ID  : ".$i."\n";
+#				next if ($sess{$i}{logon_user} =~ m/\$$/);
+#				printf "%-25s %-40s %-4s %-10s\n",::format8601Date($sess{$i}{logon_time})."Z", $sess{$i}{logon_user},$sess{$i}{logon_type},parse_duration($sess{$i}{logoff_time} - $sess{$i}{logon_time});
+#			}
+#		}
 	}
 	else {
 		print "\n";
 		print "No logins found in events file\.\n";
 	}
+	print "\n";
+	print "Analysis Tip: This plugin correlates Security-Auditing event ID 4624 and 4634 records, *by logon ID*, to track\n";
+	print "logon session durations. Account names that end in \"\$\" are not tracked; this is done to reduce the volume of\n";
+	print "output.\n";
 	
 }
 
