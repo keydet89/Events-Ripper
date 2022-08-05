@@ -51,7 +51,6 @@ sub pluginmain {
 			
 			my @elements = split(/,/,$str);
 # user, creds, target, process, network
-			next if ($elements[1] =~ m/\$$/ || $elements[1] eq "-");
 			my $str = $elements[2]."\\".$elements[1]."|".$elements[6]."\\".$elements[5]."|".$elements[8]."|".$elements[11]."|".$elements[12].":".$elements[13];
 			push(@{$sess{$tags[0]}}, $str)
 		}
@@ -60,12 +59,11 @@ sub pluginmain {
 	close(FH);
 	
 	if (scalar (keys %sess) > 0) {
-		
-
 		printf "%-22s %-25s %-25s %-25s %-40s %-20s\n","Login Time","User","Credentials","Target","Process","Network";
 		foreach my $n (sort {$a <=> $b} keys %sess) {
 			foreach my $x (@{$sess{$n}}) {
 				my @str = split(/\|/,$x);
+				next if ($str[0] =~ m/\$$/ || $str[0] eq "-\\-");
 				printf "%-22s %-25s %-25s %-25s %-40s %-20s\n",::format8601Date($n)."Z", $str[0],$str[1],$str[2],$str[3],$str[4];
 			}
 		}
