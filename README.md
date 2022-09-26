@@ -81,7 +81,7 @@
   
   Or, you can run *all* plugins (you're so very welcome, Dray) against the events file:
   
-  erip -f c:\cases\events.txt -add
+  erip -f c:\cases\events.txt -a
   
   You can also list all of the plugins available:
   
