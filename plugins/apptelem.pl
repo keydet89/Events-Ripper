@@ -72,11 +72,12 @@ sub pluginmain {
 		print "\n";
 	}
 	else {
-		 print "No Microsoft-Windows-Application-Experience/505 (app compatibility invoked) events found in the events file\.\n";
+		 print "No Microsoft-Windows-Application-Experience/505 (app compatibility invoked) or /500 events found in the events file\.\n";
 	}
 	
 	print "\n";
-	print "Analysis Tip: This plugin lists BITS Client jobs created, and URLs from BITS transfer jobs\.\n";
+	print "Analysis Tip: This plugin looks for indications that AppCompatibility was invoked, or applied to an EXE\.\n";
+	print "This can be useful as a means for detecting malware.\n";
 	print "\n";
 }
 	
