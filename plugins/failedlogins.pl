@@ -3,6 +3,7 @@
 # parse events file for failed login events
 #
 # Change history:
+#   20220930 - updated to output system name
 #   20220818 - updated to add status codes; report on substatus
 #   20220622 - created
 #
@@ -16,7 +17,7 @@
 package failedlogins;
 use strict;
 
-my %config = (version       => 20220818,
+my %config = (version       => 20220930,
               category      => "",
               MITRE         => "");
 
@@ -60,11 +61,13 @@ sub pluginmain {
 	my %type3IPs = ();
 	my %type10IPs = ();
 	my %reasons = ();
+	my %sysname = ();
 	
 	open(FH,'<',$file);
 	while (<FH>) {
 		chomp($_);
 		my @tags = split(/\|/,$_,5);
+		$sysname{$tags[2]} = 1;
 		my $desc = $tags[4];
 		
 		my ($event, $str) = split(/;/,$desc,2);
@@ -105,6 +108,13 @@ sub pluginmain {
 		}
 	}
 	close(FH);
+	
+	if (scalar keys %sysname > 0) {
+		foreach my $i (keys %sysname) {
+			print "System name: ".$i."\n";
+		}
+		print "\n";
+	}
 	
 	if (scalar (keys %types) > 0) {
 	

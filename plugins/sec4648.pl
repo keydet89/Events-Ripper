@@ -5,6 +5,7 @@
 # 
 #
 # Change history:
+#   20220930 - updated to output system name
 #   20220804 - created
 #
 # References:
@@ -16,7 +17,7 @@
 package sec4648;
 use strict;
 
-my %config = (version       => 20220804,
+my %config = (version       => 20220930,
               category      => "",
               MITRE         => "");
 
@@ -37,11 +38,13 @@ sub pluginmain {
 	print "\n";
 	
 	my %sess = ();
+	my %sysname = ();
 	
 	open(FH,'<',$file);
 	while (<FH>) {
 		chomp($_);
 		my @tags = split(/\|/,$_,5);
+		$sysname{$tags[2]} = 1;
 		my $desc = $tags[4];
 		
 		my ($event, $str) = split(/;/,$desc,2);
@@ -57,6 +60,13 @@ sub pluginmain {
 	
 	}
 	close(FH);
+	
+	if (scalar keys %sysname > 0) {
+		foreach my $i (keys %sysname) {
+			print "System name: ".$i."\n";
+		}
+		print "\n";
+	}
 	
 	if (scalar (keys %sess) > 0) {
 		printf "%-22s %-25s %-25s %-25s %-40s %-20s\n","Login Time","User","Credentials","Target","Process","Network";

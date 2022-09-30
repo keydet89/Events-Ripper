@@ -3,6 +3,7 @@
 # 
 #
 # Change history:
+#   20220930 - updated to output system names
 #   20220819 - added additional events
 #   20220805 - created
 #
@@ -15,7 +16,7 @@
 package usrmgr;
 use strict;
 
-my %config = (version       => 20220819,
+my %config = (version       => 20220930,
               category      => "",
               MITRE         => "");
 
@@ -42,11 +43,14 @@ sub pluginmain {
 	print getShortDescr()."\n";
 	print "\n";
 	
+	my %sysname = ();
+	
 	my $count = 0;
 	open(FH,'<',$file);
 	while (<FH>) {
 		chomp($_);
 		my @tags = split(/\|/,$_,5);
+		$sysname{$tags[2]} = 1;
 		my $desc = $tags[4];
 		
 		my ($event, $str) = split(/;/,$desc,2);
@@ -80,6 +84,14 @@ sub pluginmain {
 		}
 	}
 	close(FH);
+	
+	if (scalar keys %sysname > 0) {
+		foreach my $i (keys %sysname) {
+			print "System name: ".$i."\n";
+		}
+		print "\n";
+	}
+	
 	print "No Security-Auditing events found.\n" if ($count == 0);
 }
 1;

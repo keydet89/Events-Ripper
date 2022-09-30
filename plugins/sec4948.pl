@@ -5,6 +5,7 @@
 # 
 #
 # Change history:
+#   20220930 - updated to output system names
 #   20220928 - created
 #
 # References:
@@ -37,11 +38,13 @@ sub pluginmain {
 	print "\n";
 	
 	my %rules = ();
+	my %sysname = ();
 	
 	open(FH,'<',$file);
 	while (<FH>) {
 		chomp($_);
 		my @tags = split(/\|/,$_,5);
+		$sysname{$tags[2]} = 1;
 		my $desc = $tags[4];
 		
 		my ($event, $str) = split(/;/,$desc,2);
@@ -60,6 +63,13 @@ sub pluginmain {
 		}
 	}
 	close(FH);
+	
+	if (scalar keys %sysname > 0) {
+		foreach my $i (keys %sysname) {
+			print "System name: ".$i."\n";
+		}
+		print "\n";
+	}
 
 	if (scalar (keys %rules) > 0) {
 		printf "%-22s %-25s %-40s\n","Date","Profile","Rule Deleted";

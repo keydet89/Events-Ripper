@@ -8,6 +8,7 @@
 #
 #
 # Change history:
+#   20220930 - updated output for system name
 #   20220622 - created
 #
 # References:
@@ -19,7 +20,7 @@
 package scm7045;
 use strict;
 
-my %config = (version       => 20220622,
+my %config = (version       => 20220930,
               category      => "",
               MITRE         => "");
 
@@ -33,6 +34,7 @@ sub getVersion {return $config{version};}
 my $VERSION = getVersion();
 
 my %apps = ();
+my %sysmain = ();
 
 sub pluginmain {
 	my $class = shift;
@@ -45,6 +47,7 @@ sub pluginmain {
 	while (<FH>) {
 		chomp($_);
 		my @tags = split(/\|/,$_,5);
+		$sysname{$tags[2]} = 1;
 		my $desc = $tags[4];
 		
 		my ($event, $str) = split(/;/,$desc,2);
@@ -58,6 +61,13 @@ sub pluginmain {
 		}
 	}
 	close(FH);
+	
+	if (scalar keys %sysname > 0) {
+		foreach my $i (keys %sysname) {
+			print "System name: ".$i."\n";
+		}
+		print "\n";
+	}
 	
 	if (scalar (keys %apps) > 0) {
 		print "Installed Services\n";

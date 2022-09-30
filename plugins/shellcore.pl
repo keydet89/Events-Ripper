@@ -9,6 +9,7 @@
 # 9706 - completed enumeration of <key>
 #
 # Change history:
+#   20220930 - updated to output system name
 #   20220629 - created
 #
 # References:
@@ -20,7 +21,7 @@
 package shellcore;
 use strict;
 
-my %config = (version       => 20220629,
+my %config = (version       => 20220930,
               category      => "",
               MITRE         => "");
 
@@ -41,11 +42,13 @@ sub pluginmain {
 	print "\n";
 	
 	my %apps = ();
+	my %sysname = ();
 	
 	open(FH,'<',$file);
 	while (<FH>) {
 		chomp($_);
 		my @tags = split(/\|/,$_,5);
+		$sysname{$tags[2]} = 1;
 		my $desc = $tags[4];
 		
 		my ($event, $str) = split(/;/,$desc,2);
@@ -57,6 +60,13 @@ sub pluginmain {
 		}
 	}
 	close(FH);
+	
+	if (scalar keys %sysname > 0) {
+		foreach my $i (keys %sysname) {
+			print "System name: ".$i."\n";
+		}
+		print "\n";
+	}
 	
 	if (scalar (keys %apps) > 0) {
 		print "Applications launched via Run/RunOnce keys:\n";

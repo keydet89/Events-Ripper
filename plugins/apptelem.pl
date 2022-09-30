@@ -6,6 +6,7 @@
 # event ID 500 - Application compatibility invoked for.. 
 #
 # Change history:
+#   20220930 - updated to output system name(s)
 #   20220928 - created
 #
 # References:
@@ -17,7 +18,7 @@
 package apptelem;
 use strict;
 
-my %config = (version       => 20220928,
+my %config = (version       => 20220930,
               category      => "",
               MITRE         => "");
 
@@ -38,11 +39,13 @@ sub pluginmain {
 	print "\n";
 	
 	my %app = ();
+	my %sysname = ();
 	
 	open(FH,'<',$file);
 	while (<FH>) {
 		chomp($_);
 		my @tags = split(/\|/,$_,5);
+		$sysname{$tags[2]} = 1;
 		my $desc = $tags[4];
 		
 		my ($event, $str) = split(/;/,$desc,2);
@@ -63,6 +66,13 @@ sub pluginmain {
 		
 	}
 	close(FH);
+	
+	if (scalar keys %sysname > 0) {
+		foreach my $i (keys %sysname) {
+			print "System name: ".$i."\n";
+		}
+		print "\n";
+	}
 	
 	if (scalar keys %app > 0) {
 		print "Application compatibility was invoked for:\n";

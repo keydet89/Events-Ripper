@@ -5,6 +5,7 @@
 # 
 #
 # Change history:
+#   20220930 - updated to display system name(s)
 #   20220928 - created
 #
 # References:
@@ -16,7 +17,7 @@
 package bitsclient;
 use strict;
 
-my %config = (version       => 20220928,
+my %config = (version       => 20220930,
               category      => "",
               MITRE         => "");
 
@@ -38,11 +39,13 @@ sub pluginmain {
 	
 	my %created_jobs = ();
 	my %urls         = ();
+	my %sysname      = ();
 	
 	open(FH,'<',$file);
 	while (<FH>) {
 		chomp($_);
 		my @tags = split(/\|/,$_,5);
+		$sysname{$tags[2]} = 1;
 		my $desc = $tags[4];
 		
 		my ($event, $str) = split(/;/,$desc,2);
@@ -70,6 +73,13 @@ sub pluginmain {
 		else {}
 	}
 	close(FH);
+	
+	if (scalar keys %sysname > 0) {
+		foreach my $i (keys %sysname) {
+			print "System name: ".$i."\n";
+		}
+		print "\n";
+	}
 	
 	if (scalar keys %created_jobs > 0) {
 		print "BITS-Client/3 jobs\n";

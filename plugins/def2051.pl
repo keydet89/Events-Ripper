@@ -8,6 +8,7 @@
 #
 #
 # Change history:
+#   20220930 - updated to output system name
 #   20220622 - created
 #
 # References:
@@ -19,7 +20,7 @@
 package def2051;
 use strict;
 
-my %config = (version       => 20220622,
+my %config = (version       => 20220930,
               category      => "",
               MITRE         => "");
 
@@ -39,10 +40,12 @@ sub pluginmain {
 	print getShortDescr()."\n";
 	print "\n";
 	my $count = 0;
+	my %sysname = ();
 	open(FH,'<',$file);
 	while (<FH>) {
 		chomp($_);
 		my @tags = split(/\|/,$_,5);
+		$sysname{$tags[2]} = 1;
 		my $desc = $tags[4];
 		
 		my ($event, $str) = split(/;/,$desc,2);
@@ -65,6 +68,13 @@ sub pluginmain {
 		
 	}
 	close(FH);
+	
+	if (scalar keys %sysname > 0) {
+		foreach my $i (keys %sysname) {
+			print "System name: ".$i."\n";
+		}
+		print "\n";
+	}
 	
 	if ($count > 0) {
 		print "Analysis Tip: Defender/2051 events are generated when Defender is unable to upload a sample for categorization\.\n";

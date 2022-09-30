@@ -3,6 +3,7 @@
 # parse events file for login events
 #
 # Change history:
+#   20220930 - updated to output system name
 #   20220622 - created
 #
 # References:
@@ -14,7 +15,7 @@
 package logins;
 use strict;
 
-my %config = (version       => 20220622,
+my %config = (version       => 20220930,
               category      => "",
               MITRE         => "");
 
@@ -37,11 +38,13 @@ sub pluginmain {
 	my %types = ();
 	my %type3IPs = ();
 	my %type10IPs = ();
+	my %sysname = ();
 	
 	open(FH,'<',$file);
 	while (<FH>) {
 		chomp($_);
 		my @tags = split(/\|/,$_,5);
+		$sysname{$tags[2]} = 1;
 		my $desc = $tags[4];
 		
 		my ($event, $str) = split(/;/,$desc,2);
@@ -70,6 +73,13 @@ sub pluginmain {
 		}
 	}
 	close(FH);
+	
+	if (scalar keys %sysname > 0) {
+		foreach my $i (keys %sysname) {
+			print "System name: ".$i."\n";
+		}
+		print "\n";
+	}
 	
 	if (scalar (keys %types) > 0) {
 		printf "%-5s %-5s\n","Types","Count";

@@ -6,6 +6,7 @@
 # session ID.
 #
 # Change history:
+#   20220930 - updated to output system name
 #   20220804 - changed output to print times sorted
 #   20220803 - updated duration output
 #   20220802 - created
@@ -19,7 +20,7 @@
 package sessions;
 use strict;
 
-my %config = (version       => 20220804,
+my %config = (version       => 20220930,
               category      => "",
               MITRE         => "");
 
@@ -41,11 +42,13 @@ sub pluginmain {
 	
 	my %sess = ();
 	my %list = ();
+	my %sysname = ();
 	
 	open(FH,'<',$file);
 	while (<FH>) {
 		chomp($_);
 		my @tags = split(/\|/,$_,5);
+		$sysname{$tags[2]} = 1;
 		my $desc = $tags[4];
 		
 		my ($event, $str) = split(/;/,$desc,2);
@@ -83,6 +86,13 @@ sub pluginmain {
 		
 	}
 	close(FH);
+	
+	if (scalar keys %sysname > 0) {
+		foreach my $i (keys %sysname) {
+			print "System name: ".$i."\n";
+		}
+		print "\n";
+	}
 	
 	if (scalar (keys %sess) > 0) {
 		

@@ -5,6 +5,7 @@
 # 
 #
 # Change history:
+#   20220930 - updated to output system names
 #   20220928 - created
 #
 # References:
@@ -16,7 +17,7 @@
 package sec4697;
 use strict;
 
-my %config = (version       => 20220928,
+my %config = (version       => 20220930,
               category      => "",
               MITRE         => "");
 
@@ -37,11 +38,13 @@ sub pluginmain {
 	print "\n";
 	
 	my %serv = ();
+	my %sysname = ();
 	
 	open(FH,'<',$file);
 	while (<FH>) {
 		chomp($_);
 		my @tags = split(/\|/,$_,5);
+		$sysname{$tags[2]} = 1;
 		my $desc = $tags[4];
 		
 		my ($event, $str) = split(/;/,$desc,2);
@@ -59,8 +62,16 @@ sub pluginmain {
 		}
 	}
 	close(FH);
-
+	
+	if (scalar keys %sysname > 0) {
+		foreach my $i (keys %sysname) {
+			print "System name: ".$i."\n";
+		}
+		print "\n";
+	}
+	
 	if (scalar (keys %serv) > 0) {
+		print "Microsoft-Windows-Security-Auditing/4697 (service install) events\n";
 		foreach my $n (keys %serv) {
 			print $n."\n";
 		}

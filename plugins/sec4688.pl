@@ -5,6 +5,7 @@
 # 
 #
 # Change history:
+#   20220930 - updated to output system name
 #   20220928 - created
 #
 # References:
@@ -16,7 +17,7 @@
 package sec4688;
 use strict;
 
-my %config = (version       => 20220928,
+my %config = (version       => 20220930,
               category      => "",
               MITRE         => "");
 
@@ -42,6 +43,7 @@ sub pluginmain {
 	while (<FH>) {
 		chomp($_);
 		my @tags = split(/\|/,$_,5);
+		$sysname{$tags[2]} = 1;
 		my $desc = $tags[4];
 		
 		my ($event, $str) = split(/;/,$desc,2);
@@ -60,7 +62,15 @@ sub pluginmain {
 	}
 	close(FH);
 	
+	if (scalar keys %sysname > 0) {
+		foreach my $i (keys %sysname) {
+			print "System name: ".$i."\n";
+		}
+		print "\n";
+	}
+	
 	if (scalar (keys %sess) > 0) {
+		print "Microsoft-Windows-Security-Auditing/4688 processes created\n";
 		foreach my $i (keys %sess) {
 			print $i."\n";
 		}	 

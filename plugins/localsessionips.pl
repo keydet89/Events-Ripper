@@ -3,6 +3,7 @@
 # parse IPs from LocalSessionManager events
 #
 # Change history:
+#   20220930 - updated to output system name
 #   20220622 - created
 #
 # References:
@@ -14,7 +15,7 @@
 package localsessionips;
 use strict;
 
-my %config = (version       => 20220622,
+my %config = (version       => 20220930,
               category      => "",
               MITRE         => "");
 
@@ -35,6 +36,7 @@ sub pluginmain {
 	print "\n";
 	
 	my %ips = ();
+	my %sysname = ();
 
 # Event IDs
 # 21 - session login
@@ -46,6 +48,7 @@ sub pluginmain {
 	while (<FH>) {
 		chomp($_);
 		my @tags = split(/\|/,$_,5);
+		$sysname{$tags[2]} = 1;
 		my $desc = $tags[4];
 		
 		my ($event, $str) = split(/;/,$desc,2);
@@ -65,6 +68,13 @@ sub pluginmain {
 		
 	}
 	close(FH);
+	
+	if (scalar keys %sysname > 0) {
+		foreach my $i (keys %sysname) {
+			print "System name: ".$i."\n";
+		}
+		print "\n";
+	}
 	
 	if (scalar (keys %ips) > 0) {
 		printf "%-20s %-10s\n","IP Address","Count";
