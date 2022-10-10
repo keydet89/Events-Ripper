@@ -67,7 +67,7 @@ sub pluginmain {
 	
 	if (scalar (keys %volumes) > 0) {
 		print "Mounted Volumes:\n";
-		foreach my $a (keys %volumes) {
+		foreach my $a (sort keys %volumes) {
 			print $a."\n";
 		}
 		print "\n";
