@@ -38,6 +38,7 @@ sub pluginmain {
 	print "\n";
 	
 	my %sess = ();
+	my %sysname = ();
 	
 	open(FH,'<',$file);
 	while (<FH>) {

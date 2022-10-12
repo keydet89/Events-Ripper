@@ -34,7 +34,7 @@ sub getVersion {return $config{version};}
 my $VERSION = getVersion();
 
 my %apps = ();
-my %sysmain = ();
+my %sysname = ();
 
 sub pluginmain {
 	my $class = shift;
