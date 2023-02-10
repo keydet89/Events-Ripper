@@ -3,11 +3,12 @@
 # parse IPs from LocalSessionManager events
 #
 # Change history:
+#   20230209 - updated with intel
 #   20220930 - updated to output system name
 #   20220622 - created
 #
 # References:
-#   
+#   https://twitter.com/malmoeb/status/1519710302820089857?lang=en-GB
 #
 # copyright 2022 Quantum Analytics Research, LLC
 # author: H. Carvey, keydet89@yahoo.com
@@ -15,7 +16,7 @@
 package localsessionips;
 use strict;
 
-my %config = (version       => 20220930,
+my %config = (version       => 20230209,
               category      => "",
               MITRE         => "");
 
@@ -81,6 +82,10 @@ sub pluginmain {
 		foreach my $i (keys %ips) {
 			printf "%-20s %-10d\n",$i,$ips{$i};
 		}
+		print "\n";
+		print "Analysis Tip: A Source IP address of \":%16777216\" may indicate the use of ngrok tunneling.\n";
+		print "\n";
+		print "Ref: https://twitter.com/malmoeb/status/1519710302820089857?lang=en-GB\n";
 	}
 	else {
 		print "No LocalSessionManager events with IP addresses found\.\n";
