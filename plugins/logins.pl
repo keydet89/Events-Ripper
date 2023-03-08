@@ -102,6 +102,13 @@ sub pluginmain {
 				print "  ".$i."\n";
 			}
 		}
+		print "\n";
+		print "Analysis Tip: For type 9 logins: \n";
+		print "When you start a program with RunAs using /netonly, the program executes on your local computer as the user \n";
+		print "you are currently logged on as but for any connections to other computers on the network, Windows connects you\n";
+		print "to those computers using the account specified on the RunAs command.\n";
+		print "\n";
+		print "Ref: https://techgenix.com/logon-types/\n";
 	}
 	else {
 		print "\n";

@@ -6,6 +6,7 @@
 # session ID.
 #
 # Change history:
+#   20230307 - updated to include type 9 logins
 #   20220930 - updated to output system name
 #   20220804 - changed output to print times sorted
 #   20220803 - updated duration output
@@ -20,7 +21,7 @@
 package sessions;
 use strict;
 
-my %config = (version       => 20220930,
+my %config = (version       => 20230307,
               category      => "",
               MITRE         => "");
 
@@ -59,7 +60,7 @@ sub pluginmain {
 			my @elements = split(/,/,$str);
 			my $type = $elements[8];
 			
-			if ($type == 3 || $type == 10 || $type == 2) {
+			if ($type == 3 || $type == 10 || $type == 2 || $type == 9) {
 				my $id = $elements[7];
 				$sess{$id}{logon_time} = $tags[0];
 				$sess{$id}{logon_type} = $type;
@@ -76,7 +77,7 @@ sub pluginmain {
 			my @elements = split(/,/,$str);
 			my $type = $elements[4];
 			
-			if ($type == 3 || $type == 10 || $type == 2) {
+			if ($type == 3 || $type == 10 || $type == 2 || $type == 9) {
 				my $id = $elements[3];
 				$sess{$id}{logoff_time} = $tags[0];
 				$sess{$id}{logoff_SID}  = $elements[0];

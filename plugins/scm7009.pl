@@ -1,6 +1,6 @@
 #-----------------------------------------------------------
-# scm7045.pl
-# parse Service Control Manager event ID 7045 events
+# scm7009.pl
+# parse Service Control Manager event ID 7009 events
 #
 # 
 # Pivot Points/Analysis: 
@@ -8,26 +8,25 @@
 #
 #
 # Change history:
-#   20220930 - updated output for system name
-#   20220622 - created
+#   20230307 - created
 #
 # References:
 #   
 #
-# copyright 2022 Quantum Analytics Research, LLC
+# copyright 2023 Quantum Analytics Research, LLC
 # author: H. Carvey, keydet89@yahoo.com
 #-----------------------------------------------------------
-package scm7045;
+package scm7009;
 use strict;
 
-my %config = (version       => 20220930,
+my %config = (version       => 20230307,
               category      => "",
               MITRE         => "");
 
 sub getConfig{return %config}
 
 sub getShortDescr {
-	return "Parse SCM/7045 events";	
+	return "Parse Service Control Manager/7009 events";	
 }
 sub getVersion {return $config{version};}
 
@@ -39,7 +38,7 @@ my %sysname = ();
 sub pluginmain {
 	my $class = shift;
 	my $file = shift;
-	print "Launching scm7045 v.".$VERSION."\n";
+	print "Launching scm7009 v.".$VERSION."\n";
 	print getShortDescr()."\n";
 	print "\n";
 	
@@ -53,10 +52,10 @@ sub pluginmain {
 		my ($event, $str) = split(/;/,$desc,2);
 		my ($src,$id) = split(/\//,$event,2);
 		
-		if ($src eq "Service Control Manager" && $id eq "7045") {
+		if ($src eq "Service Control Manager" && $id eq "7009") {
 			
 			my @s = split(/,/,$str);
-			my $app      = $s[0]." -> ".$s[1];
+			my $app      = $s[1];
 			$apps{$app} = 1;
 		}
 	}
@@ -70,15 +69,15 @@ sub pluginmain {
 	}
 	
 	if (scalar (keys %apps) > 0) {
-		print "Installed Services\n";
+		print "Services with Timeout Reached\n";
 		foreach my $a (keys %apps) {
 			print $a."\n";
 		}
 		print "\n";
-		print "Analysis Tip: Installed services may provide indications of malicious persistence\.\n";
+		print "Analysis Tip: SCM/7009 event records indicate that a timeout was reached\.\n";
 	}
 	else {
-		print "No installed service events found\.\n";
+		print "No SCM/7009 events found\.\n";
 	}
 }
 1;

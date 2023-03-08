@@ -22,7 +22,7 @@ my %config = (version       => 20221010,
 sub getConfig{return %config}
 
 sub getShortDescr {
-	return "Get VHD[X}/ISO files mounted";	
+	return "Get VHD[X]/ISO files mounted";	
 }
 sub getVersion {return $config{version};}
 

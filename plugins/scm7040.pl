@@ -1,6 +1,7 @@
 #-----------------------------------------------------------
 # scm7045.pl
-# parse Service Control Manager event ID 7045 events
+# parse Service Control Manager event ID 7040 events, looking for
+# services that have been disabled
 #
 # 
 # Pivot Points/Analysis: 
@@ -8,26 +9,25 @@
 #
 #
 # Change history:
-#   20220930 - updated output for system name
-#   20220622 - created
+#   20230308 - created
 #
 # References:
-#   
+#   https://www.linkedin.com/posts/john-dwyer-xforce_threathunting-threatdetection-malware-activity-7038997228815867904-F8wj
 #
-# copyright 2022 Quantum Analytics Research, LLC
+# copyright 2023 Quantum Analytics Research, LLC
 # author: H. Carvey, keydet89@yahoo.com
 #-----------------------------------------------------------
-package scm7045;
+package scm7040;
 use strict;
 
-my %config = (version       => 20220930,
+my %config = (version       => 20230308,
               category      => "",
               MITRE         => "");
 
 sub getConfig{return %config}
 
 sub getShortDescr {
-	return "Parse SCM/7045 events";	
+	return "Parse SCM/7040 events for disabled services";	
 }
 sub getVersion {return $config{version};}
 
@@ -39,7 +39,7 @@ my %sysname = ();
 sub pluginmain {
 	my $class = shift;
 	my $file = shift;
-	print "Launching scm7045 v.".$VERSION."\n";
+	print "Launching scm7040 v.".$VERSION."\n";
 	print getShortDescr()."\n";
 	print "\n";
 	
@@ -53,11 +53,13 @@ sub pluginmain {
 		my ($event, $str) = split(/;/,$desc,2);
 		my ($src,$id) = split(/\//,$event,2);
 		
-		if ($src eq "Service Control Manager" && $id eq "7045") {
+		if ($src eq "Service Control Manager" && $id eq "7040") {
 			
 			my @s = split(/,/,$str);
-			my $app      = $s[0]." -> ".$s[1];
-			$apps{$app} = 1;
+			if ($s[2] eq "disabled") {
+				my $app = $tags[0].":".$s[0];
+				$apps{$app} = 1;
+			}
 		}
 	}
 	close(FH);
@@ -70,15 +72,16 @@ sub pluginmain {
 	}
 	
 	if (scalar (keys %apps) > 0) {
-		print "Installed Services\n";
+		print "Services with start type changed to \"disabled\":\n";
 		foreach my $a (keys %apps) {
-			print $a."\n";
+			my ($t0,$t1) = split(/:/,$a);
+			printf "%-25s %-50s\n",::format8601Date($t0)."Z",$t1;
 		}
 		print "\n";
-		print "Analysis Tip: Installed services may provide indications of malicious persistence\.\n";
+		print "Analysis Tip: SCM/7040 events provide indications of services that have been disabled\.\n";
 	}
 	else {
-		print "No installed service events found\.\n";
+		print "No services whose start type was changed to \"disabled\" found\.\n";
 	}
 }
 1;
