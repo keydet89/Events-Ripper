@@ -5,6 +5,7 @@
 # 
 #
 # Change history:
+#   20230523 - updated filtering of known-good domains for event ID 59 events
 #   20220930 - updated to display system name(s)
 #   20220928 - created
 #
@@ -17,7 +18,7 @@
 package bitsclient;
 use strict;
 
-my %config = (version       => 20220930,
+my %config = (version       => 20230523,
               category      => "",
               MITRE         => "");
 
@@ -41,6 +42,13 @@ sub pluginmain {
 	my %urls         = ();
 	my %sysname      = ();
 	
+	my @hosts = ("http://edgedl\.me\.gvt1\.com",
+				 "http://redirector\.gvt1\.com",
+				 "http://download\.windowsupdate\.com",
+				 "http://storage\.googleapis\.com",
+				 "http://msedge\.b\.tlu\.dl\.delivery\.mp\.microsoft\.com",
+				 "https://g\.live\.com");
+	
 	open(FH,'<',$file);
 	while (<FH>) {
 		chomp($_);
@@ -63,12 +71,24 @@ sub pluginmain {
 		elsif ($src eq "Microsoft-Windows-Bits-Client" && $id eq "59") {
 			my @elements = split(/,/,$str);
 			
-			if (exists $urls{$elements[3]}) {
-				$urls{$elements[3]}++;
+			my $count = 0;
+			foreach my $h (@hosts) {
+#				print "URL: ".$elements[3]." - Checked item: ".$h."\n";
+				if ($elements[3] =~ m/^$h/) {
+					$count = 1;
+				}
 			}
-			else {
-				$urls{$elements[3]} = 1;
-			}		
+			
+
+			if ($count == 0) {
+			
+				if (exists $urls{$elements[3]}) {
+					$urls{$elements[3]}++;
+				}
+				else {
+					$urls{$elements[3]} = 1;
+				}
+			}				
 		}
 		else {}
 	}
@@ -105,7 +125,7 @@ sub pluginmain {
 	}
 	
 	print "\n";
-	print "Analysis Tip: This plugin lists BITS Client jobs created, and URLs from BITS transfer jobs\.\n";
+	print "Analysis Tip: This plugin lists BITS Client jobs created, and URLs from BITS transfer jobs, filtering out known-good domains\.\n";
 	print "\n";
 }
 	
