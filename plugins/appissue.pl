@@ -6,6 +6,7 @@
 #   - look for unusual applications that have crashed 
 #
 # Change history:
+#   20230605 - updated to include Application Popup/875 events
 #   20230504 - updated to include Application Error/1000 events
 #   20220930 - updated to output system name
 #   20220622 - created
@@ -19,7 +20,7 @@
 package appissue;
 use strict;
 
-my %config = (version       => 20230504,
+my %config = (version       => 20230605,
               category      => "",
               MITRE         => "");
 
@@ -43,6 +44,7 @@ sub pluginmain {
 	my %apps1002 = ();
 	my %apps1000 = ();
 	my %wer1001  = ();
+	my %bad      = ();
 	
 	open(FH,'<',$file);
 	while (<FH>) {
@@ -65,6 +67,10 @@ sub pluginmain {
 		elsif ($src eq "Windows Error Reporting" && $id eq "1001") {
 			my @s = split(/,/,$str);
 			$wer1001{$s[5]} = 1;
+		}
+		elsif ($src eq "Application Popup" && $id eq "875") {
+			my @s = split(/,/,$str);
+			$bad{$tags[0]} = $s[1];
 		}
 		else {}
 	}
@@ -117,6 +123,22 @@ sub pluginmain {
 	else {
 		print "No Windows Error Reporting/1001 events found\.\n";
 	}
-
+	print "\n";
+	
+# Added 20230605
+# https://intelligentsystemsmonitoring.com/tag/event-875/
+	if (scalar (keys %bad) > 0) {
+		print "Application Popup/875 events: \n";
+		foreach my $i (reverse sort {$a <=> $b} keys %bad) {
+			printf "%-25s %-40s\n",::format8601Date($i)."Z",$bad{$i}." driver blocked from loading";
+		}
+		print "\n";
+		print "Analysis Tip: Application Popup/875 events can provide indications of attempts to load malicious drivers.\n";
+		print "\n";
+		print "Ref: https://intelligentsystemsmonitoring.com/tag/event-875/\n";
+	}
+	else {
+		print "No Application Popup/875 events found.\n";
+	}
 }
 1;
