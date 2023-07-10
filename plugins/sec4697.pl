@@ -1,6 +1,6 @@
 #-----------------------------------------------------------
 # sec4697.pl
-# Checks for firewall rule deletion events
+# Checks for service install events in Security.evtx
 #
 # 
 #
@@ -82,9 +82,7 @@ sub pluginmain {
 	}
 	
 	print "\n";
-	print "Analysis Tip: This plugin lists firewall rule deletion events\. These events may be accompanied by the use of netsh\.exe\.\n";
-	print "Check Prefetch files\.\n";
-	
+	print "Analysis Tip: This plugin lists service install events found in Security\.evtx.\n";
 }
 	
 1;

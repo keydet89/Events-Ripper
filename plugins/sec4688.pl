@@ -1,6 +1,6 @@
 #-----------------------------------------------------------
 # sec4688.pl
-# parse login/logoff events to get session info
+# parse process creation events
 #
 # 
 #
