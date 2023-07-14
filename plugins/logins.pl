@@ -3,19 +3,20 @@
 # parse events file for login events
 #
 # Change history:
+#   20230714 - updates to output (type 3 & 10 usernames/SIDs, source system names)
 #   20220930 - updated to output system name
 #   20220622 - created
 #
 # References:
 #   https://docs.microsoft.com/en-us/windows/security/threat-protection/auditing/basic-audit-logon-events
 #
-# copyright 2022 Quantum Analytics Research, LLC
+# copyright 2023 Quantum Analytics Research, LLC
 # author: H. Carvey, keydet89@yahoo.com
 #-----------------------------------------------------------
 package logins;
 use strict;
 
-my %config = (version       => 20220930,
+my %config = (version       => 20230714,
               category      => "",
               MITRE         => "");
 
@@ -35,10 +36,13 @@ sub pluginmain {
 	print getShortDescr()."\n";
 	print "\n";
 	
-	my %types = ();
-	my %type3IPs = ();
-	my %type10IPs = ();
-	my %sysname = ();
+	my %types      = ();
+	my %type3IPs   = ();
+	my %type3user  = ();
+	my %type10user = ();
+	my %type10IPs  = ();
+	my %names      = ();
+	my %sysname    = ();
 	
 	open(FH,'<',$file);
 	while (<FH>) {
@@ -55,12 +59,18 @@ sub pluginmain {
 			my @elements = split(/,/,$str);
 			my $type = $elements[8];
 			
+			if ($type == 3 || $type == 10) {
+				$names{$elements[11]."/".$elements[18]} = 1 unless ($elements[11] eq "-" || $elements[11] eq " ");
+			}
+			
 			if ($type == 3) {
 				$type3IPs{$elements[18]} = 1 unless ($elements[18] eq "-" || $elements[18] eq "::1");
+				$type3user{$elements[5]."/".$elements[4]} = 1;
 			}
 			
 			if ($type == 10) {
 				$type10IPs{$elements[18]} = 1;
+				$type10user{$elements[5]."/".$elements[4]} = 1;
 			}
 			
 			
@@ -94,7 +104,15 @@ sub pluginmain {
 				print "  ".$i."\n";
 			}
 		}
-	
+		
+		if (scalar (keys %type3user) > 0) {
+			print "\n";
+			print "Type 3 Login Usernames/SIDs:\n";
+			foreach my $i (keys %type3user) {
+				print "  ".$i."\n";
+			}		
+		}
+		
 		if (scalar (keys %type10IPs) > 0) {
 			print "\n";
 			print "Type 10 Login IPs\n";
@@ -102,6 +120,23 @@ sub pluginmain {
 				print "  ".$i."\n";
 			}
 		}
+		
+		if (scalar (keys %type10user) > 0) {
+			print "\n";
+			print "Type 10 Login Usernames/SIDs:\n";
+			foreach my $i (keys %type10user) {
+				print "  ".$i."\n";
+			}		
+		}
+		
+		if (scalar (keys %names) > 0) {
+			print "\n";
+			print "System names/source IP addresses (type 3 & 10 logins):\n";
+			foreach my $n (keys %names) {
+				print "  ".$n."\n";
+			}
+		}
+		
 		print "\n";
 		print "Analysis Tip: For type 9 logins: \n";
 		print "When you start a program with RunAs using /netonly, the program executes on your local computer as the user \n";
