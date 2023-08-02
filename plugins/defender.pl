@@ -8,6 +8,7 @@
 #
 #
 # Change history:
+#   20230802 - added check for 2050 events
 #   20230503 - created
 #
 # References:
@@ -19,7 +20,7 @@
 package defender;
 use strict;
 
-my %config = (version       => 20230503,
+my %config = (version       => 20230802,
               category      => "",
               MITRE         => "");
 
@@ -42,6 +43,7 @@ sub pluginmain {
 	my %detections = ();
 	my %files      = ();
 	my %changes    = ();
+	my %submit     = ();
 	
 	open(FH,'<',$file);
 	while (<FH>) {
@@ -59,6 +61,12 @@ sub pluginmain {
 				my @s = split(/,/,$str);
 				$detections{$tags[0]} = $id.": ".$s[7];
 			
+			}
+# added 20230802			
+			elsif ($id eq "2050") {
+				my @s = split(/,/,$str);
+				my $str = $s[2]."|".$s[3];
+				$submit{$str} = 1;
 			}
 			elsif ($id eq "2051") {
 				my @s = split(/,/,$str);
@@ -100,10 +108,24 @@ sub pluginmain {
 	
 	print "\n";
 	
+	if (scalar (keys %submit) > 0) {
+		print "Files submitted by WinDefend:\n";
+		foreach my $i (keys %submit) {
+			my @f = split(/\|/,$i,2);
+			printf "%-50s SHA-256: %-40s\n",$f[0],$f[1];
+		}
+		print "\n";
+		print "Analysis Tip: Defender/2050 events are generated when Defender is uploads a sample for categorization\.\n";
+	}
+	else {
+		print "No Defender/2050 events found\.\n";
+	}
+	print "\n";
+	
 	if (scalar (keys %files) > 0) {
 		print "Files that could not be sent by WinDefend:\n";
 		foreach my $i (keys %files) {
-			my @f = split(/|/,$i,3);
+			my @f = split(/\|/,$i,3);
 			printf "%-25s %-50s SHA-256: %-40s\n",$f[0],$f[1],$f[2];
 		}
 		print "\n";
@@ -119,6 +141,7 @@ sub pluginmain {
 	if (scalar (keys %changes) > 0) {
 		print "Modifications to Windows Defender:\n";
 		foreach my $m (keys %changes) {
+			next if ($m eq "");
 			print $m."\n";
 		}
 		print "\n";

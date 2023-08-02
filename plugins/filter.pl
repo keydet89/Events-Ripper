@@ -5,6 +5,7 @@
 # 
 #
 # Change history:
+#   20230802 - added check for 5152 events
 #   20230503 - created
 #
 # References:
@@ -16,14 +17,14 @@
 package filter;
 use strict;
 
-my %config = (version       => 20230503,
+my %config = (version       => 20230802,
               category      => "",
               MITRE         => "");
 
 sub getConfig{return %config}
 
 sub getShortDescr {
-	return "Parse Security-Auditing/5156, /5158 events";	
+	return "Parse Windows Filtering Platform events from Security\.evtx";	
 }
 sub getVersion {return $config{version};}
 
@@ -38,7 +39,8 @@ sub pluginmain {
 	
 	my %sysname = ();
 	my %conn    = ();
-	my %bind    =();
+	my %bind    = ();
+	my %block   = ();
 	
 	open(FH,'<',$file);
 	while (<FH>) {
@@ -56,7 +58,6 @@ sub pluginmain {
 			if ($id eq "5156") {
 				my $i = (split(/,/,$str))[1];
 				$conn{$i} = 1;
-			
 			}
 # Windows Filtering Platform permitted a bind to a local port
 # https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-5158
@@ -64,6 +65,11 @@ sub pluginmain {
 				my $i = (split(/,/,$str))[1];
 				$bind{$i} = 1;
 	
+			}
+# https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-5152
+			elsif ($id eq "5152") {
+				my $i = (split(/,/,$str))[3];
+				$block{$i} = 1;
 			}
 			else {}
 			
@@ -101,6 +107,22 @@ sub pluginmain {
 		}
 		print "\n";
 		print "Analysis Tip: Each of the listed applications was permitted by WFP to bind to a local port.\n";
+	
+	}
+	else {
+		print "\n";
+		print "No Microsoft-Windows-Security-Auditing/5158 events found in events file\.\n";
+	}
+	
+	print "\n";
+	
+	if (scalar (keys %block) > 0) {
+		printf "Windows Filtering Platform blocked packets - source IP addresses:\n";
+		foreach my $n (keys %block) {
+			print $n."\n";
+		}
+		print "\n";
+		print "Analysis Tip: Source IP addresses for blocked packets.\n";
 	
 	}
 	else {
