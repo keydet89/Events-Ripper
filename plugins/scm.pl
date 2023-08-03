@@ -1,6 +1,6 @@
 #-----------------------------------------------------------
 # scm.pl
-# parse Service Control Manager events - /7000, /7009, /7024, /7040, /7045
+# parse Service Control Manager events - /7000, /7009, /7024, /7040, /7045, /7031
 #
 # 
 # Pivot Points/Analysis: 
@@ -8,6 +8,7 @@
 #
 #
 # Change history:
+#   20230802 - added /7031 service crash events
 #   20230503 - created
 #
 # References:
@@ -20,7 +21,7 @@
 package scm;
 use strict;
 
-my %config = (version       => 20230504,
+my %config = (version       => 20230802,
               category      => "",
               MITRE         => "");
 
@@ -46,6 +47,7 @@ sub pluginmain {
 	my %i7024    = ();
 	my %i7040    = ();
 	my %i7045    = ();
+	my %i7031    = ();
 	
 	open(FH,'<',$file);
 	while (<FH>) {
@@ -75,6 +77,10 @@ sub pluginmain {
 			elsif ($id eq "7040") {
 				my @s = split(/,/,$str);
 				$i7040{$tags[0].":".$s[0]} = 1 if ($s[2] eq "disabled");
+			}
+			elsif ($id eq "7031") {
+				my @s = split(/,/,$str);
+				$i7031{$tags[0].":".$s[0]} = 1;
 			}
 			elsif ($id eq "7045") {
 				my @s = split(/,/,$str);
@@ -165,7 +171,24 @@ sub pluginmain {
 		
 	}
 	else {
-		print "No Service Control Manager45 events found\.\n";
+		print "No Service Control Manager/7045 (service installation) events found\.\n";
+	}
+	
+	print "\n";
+	
+	if (scalar (keys %i7031) > 0) {
+		print "Service Crash Events:\n";
+		foreach my $n (keys %i7031) {
+			my ($t,$s) = split(/:/,$n,2);
+			printf "%-25s %-60s\n",::format8601Date($t)."Z",$s;
+		}
+		print "\n";
+		print "Analysis Tip: A service crash event may indicate an issue that needs to be addressed. Some services may \n";
+		print "crash during a file encryption/ransomware event.\n";
+		
+	}
+	else {
+		print "No Service Control Manager/7031 (service crash) events found\.\n"; 
 	}
 	
 }
