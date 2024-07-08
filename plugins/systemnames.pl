@@ -3,6 +3,7 @@
 # parse events file for login events
 #
 # Change history:
+#   20240708 - added RemoteConnectionManager events
 #   20240515 - created
 #
 #
@@ -12,14 +13,14 @@
 package systemnames;
 use strict;
 
-my %config = (version       => 20240515,
+my %config = (version       => 20240708,
               category      => "",
               MITRE         => "");
 
 sub getConfig{return %config}
 
 sub getShortDescr {
-	return "Parse Security-Auditing events for remote endpoint names";	
+	return "Parse various events for remote/source endpoint names";	
 }
 sub getVersion {return $config{version};}
 
@@ -36,6 +37,7 @@ sub pluginmain {
 	my %fnames     = ();
 	my %vnames     = ();
 	my %snames     = ();
+	my %rem        = ();
 	my %splash     = ();
 	my %sysname    = ();
 	
@@ -95,8 +97,10 @@ sub pluginmain {
 			}
 		}
 
-# https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4779		
-		if ($src eq "Microsoft-Windows-Security-Auditing" && $id eq "4779") {
+# https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4779	
+# event ID 4778 - session reconnect
+# event ID 4779 - session disconnect
+		if ($src eq "Microsoft-Windows-Security-Auditing" && ($id eq "4779" || $id eq "4778")) {
 			
 			my @elements = split(/,/,$str);
 			next if $elements[4] eq " " || $elements[4] eq "-";
@@ -107,7 +111,20 @@ sub pluginmain {
 				$snames{$elements[4]} = 1;
 			}	
 		}
+
+# requires Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational Event Log		
+		if ($src eq "Microsoft-Windows-TerminalServices-RemoteConnectionManager" && $id eq "1149") {
+			my @elements = split(/,/,$str);
+			next if $elements[1] eq " " || $elements[1] eq "-";
+			if (exists $splash{$elements[1]}) {
+				$rem{$elements[1]}++;
+			}
+			else {
+				$rem{$elements[1]} = 1;
+			}	
+		}
 		
+# requires Splashtop-Splashtop Streamer-Remote Session Event Log
 		if ($src eq "Splashtop-Splashtop Streamer-Remote Session" && $id eq "1000") {
 			my @elements = split(/,/,$str);
 			next if $elements[2] eq " " || $elements[2] eq "-";
@@ -158,12 +175,22 @@ sub pluginmain {
 	
 	if (scalar (keys %snames) > 0) {
 		print "\n";
-		print "System names (session disconnect):\n";
+		print "System names (session reconnect/disconnect):\n";
 		printf "%-20s %-5s\n","Name","Freq";
 		foreach my $n (keys %snames) {
 			printf "%-20s %-5d\n", $n, $snames{$n};
 		}
 	}	
+	
+	if (scalar (keys %rem) > 0) {
+		print "\n";
+		print "RemoteConnectionManager domains/names:\n";
+		printf "%-20s %-5s\n","Name","Freq";
+		foreach my $n (keys %rem) {
+			printf "%-20s %-5d\n", $n, $rem{$n};
+		}
+	}	
+	
 	
 	if (scalar (keys %splash) > 0) {
 		print "\n";
