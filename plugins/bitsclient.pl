@@ -5,6 +5,7 @@
 # 
 #
 # Change history:
+#	20240807 - updated to list job names
 #   20230523 - updated filtering of known-good domains for event ID 59 events
 #   20220930 - updated to display system name(s)
 #   20220928 - created
@@ -18,7 +19,7 @@
 package bitsclient;
 use strict;
 
-my %config = (version       => 20230523,
+my %config = (version       => 20240807,
               category      => "",
               MITRE         => "");
 
@@ -41,6 +42,7 @@ sub pluginmain {
 	my %created_jobs = ();
 	my %urls         = ();
 	my %sysname      = ();
+	my %names        = ();
 	
 	my @hosts = ("http://edgedl\.me\.gvt1\.com",
 				 "http://redirector\.gvt1\.com",
@@ -61,6 +63,7 @@ sub pluginmain {
 
 		if ($src eq "Microsoft-Windows-Bits-Client" && $id eq "3") {
 			my @elements = split(/,/,$str);
+			$names{$elements[0]} = 1;
 			if (exists $created_jobs{$elements[3]}) {
 				$created_jobs{$elements[3]}++;
 			}
@@ -70,7 +73,7 @@ sub pluginmain {
 		}
 		elsif ($src eq "Microsoft-Windows-Bits-Client" && $id eq "59") {
 			my @elements = split(/,/,$str);
-			
+			$names{$elements[1]} = 1;
 			my $count = 0;
 			foreach my $h (@hosts) {
 #				print "URL: ".$elements[3]." - Checked item: ".$h."\n";
@@ -124,8 +127,19 @@ sub pluginmain {
 		 print "No Microsoft-Windows-Bits-Client/59 (transfer job started) events found in the events file\.\n";
 	}
 	
+	if (scalar keys %names > 0) {
+		print "BITS Client job names: \n";
+		foreach (keys %names) {
+			print $_."\n";
+		}
+	}
+	else {
+		print "No BITS Client jobs names found.\n";
+	}
+	
 	print "\n";
-	print "Analysis Tip: This plugin lists BITS Client jobs created, and URLs from BITS transfer jobs, filtering out known-good domains\.\n";
+	print "Analysis Tip: This plugin lists BITS Client jobs created, and URLs from BITS transfer jobs, filtering out known-good \n";
+	print "domains\. Also, look for unusual job names, such as \"debjob\"\n";
 	print "\n";
 }
 	

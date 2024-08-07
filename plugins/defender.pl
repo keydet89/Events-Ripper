@@ -8,6 +8,7 @@
 #
 #
 # Change history:
+#   20240807 - updated to include feature disabled events
 #   20240610 - added event ID 1119 parsing, extracted files from 1116/1117/1119 events
 #   20240112 - added event ID 5013 parsing
 #   20230802 - added check for 2050 events
@@ -22,7 +23,7 @@
 package defender;
 use strict;
 
-my %config = (version       => 20240112,
+my %config = (version       => 20240807,
               category      => "",
               MITRE         => "");
 
@@ -45,6 +46,7 @@ sub pluginmain {
 	my %detections = ();
 	my %files      = ();
 	my %changes    = ();
+	my %disabled   = ();
 	my %submit     = ();
 	my %tamper     = ();
 	my %failed     = ();
@@ -97,6 +99,18 @@ sub pluginmain {
 				my @s = split(/,/,$str);
 				$changes{$s[3]} = 1;
 			}
+# added 20240807
+# https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus
+			elsif ($id eq "5001") {
+				$disabled{$tags[0]}{"MALWAREPROTECTION_RTP_DISABLED"} = 1;
+			}
+            elsif ($id eq "5004") {
+				my @s = split(/,/,$str);
+				$disabled{$tags[0]}{$s[2]." MALWAREPROTECTION_RTP_FEATURE_CONFIGURED"} = 1;
+			}
+			elsif ($id eq "5012") {
+				$disabled{$tags[0]}{"MALWAREPROTECTION_ANTIVIRUS_DISABLED"} = 1;
+			}
 			else {}
 		}
 	}
@@ -112,7 +126,7 @@ sub pluginmain {
 	if (scalar (keys %detections) > 0) {
 		
 		foreach my $n (reverse sort {$a <=> $b} keys %detections) {
-			printf "%-25s %-10s\n",::format8601Date($n),$detections{$n},
+			printf "%-25s %-10s\n",::format8601Date($n)."Z",$detections{$n},
 			
 		}
 
@@ -138,7 +152,7 @@ sub pluginmain {
 	if (scalar (keys %failed) > 0) {
 		print "Windows Defender Failures:\n";
 		foreach my $n (reverse sort {$a <=> $b} keys %failed) {
-			printf "%-25s %-10s\n",::format8601Date($n),$failed{$n},
+			printf "%-25s %-10s\n",::format8601Date($n)."Z",$failed{$n},
 		}
 		print "\n";
 		print "Failed Files:\n";
@@ -149,6 +163,25 @@ sub pluginmain {
 	}
 	else {
 		print "No Defender/1119 failure events found.\n";
+	}
+	
+	print "\n";
+	
+	if (scalar (keys %disabled) > 0) {
+		print "Windows Defender Disabled Features: \n";
+		foreach my $i (reverse sort keys %disabled) {
+			printf "%-25s \n", ::format8601Date($i)."Z";
+			
+			foreach my $r (keys %{$disabled{$i}}) {
+				print "    ".$r."\n";
+			}							
+		}
+		print "\n";
+		print "Analysis Tip: Defender/5001, ../5004, and ../5012 events are generated when attempts are made disable\n";
+		print "Windows Defender capabilities.\n";
+	}
+	else {
+		print "No events indicating Defender disabled features found\.\n";
 	}
 	
 	print "\n";
