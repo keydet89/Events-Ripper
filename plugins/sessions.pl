@@ -6,6 +6,7 @@
 # session ID.
 #
 # Change history:
+#   20241106 - added workstation name/IP addr to output
 #   20230307 - updated to include type 9 logins
 #   20220930 - updated to output system name
 #   20220804 - changed output to print times sorted
@@ -15,13 +16,13 @@
 # References:
 #   
 #
-# copyright 2022 Quantum Analytics Research, LLC
+# copyright 2024 Quantum Analytics Research, LLC
 # author: H. Carvey, keydet89@yahoo.com
 #-----------------------------------------------------------
 package sessions;
 use strict;
 
-my %config = (version       => 20230307,
+my %config = (version       => 20241106,
               category      => "",
               MITRE         => "");
 
@@ -100,16 +101,17 @@ sub pluginmain {
 		foreach my $i (keys %sess) {
 			if (exists $sess{$i}{logon_time} && exists $sess{$i}{logoff_time}) {
 				next if ($sess{$i}{logon_user} =~ m/\$$/);
-				push(@{$list{$sess{$i}{logon_time}}},$sess{$i}{logon_user}."|".$sess{$i}{logon_type}."|".parse_duration($sess{$i}{logoff_time} - $sess{$i}{logon_time}));
+				push(@{$list{$sess{$i}{logon_time}}},$sess{$i}{logon_user}."|".$sess{$i}{logon_type}."|".parse_duration($sess{$i}{logoff_time} - $sess{$i}{logon_time}).
+				"|".$sess{$i}{logon_NetBIOS}."/".$sess{$i}{logon_IP});
 			}
 		}
 		
-		printf "%-25s %-40s %-4s %-10s\n","Login Time","User","Type","Duration";
-		foreach my $n (sort {$a <=> $b} keys %list) {
+		printf "%-25s %-40s %-4s %-10s %-40s\n","Login Time","User","Type","Duration","Wrkstn/IP";
+		foreach my $n (reverse sort {$a <=> $b} keys %list) {
 			foreach my $x (@{$list{$n}}) {
 				my @str = split(/\|/,$x);
 #				print $n." - ".$x."\n";
-				printf "%-25s %-40s %-4s %-10s\n",::format8601Date($n)."Z", $str[0],$str[1],$str[2];
+				printf "%-25s %-40s %-4s %-10s %-40s\n",::format8601Date($n)."Z", $str[0],$str[1],$str[2],$str[3];
 			}
 		}
 		

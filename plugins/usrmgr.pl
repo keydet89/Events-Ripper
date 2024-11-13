@@ -44,6 +44,7 @@ sub pluginmain {
 	print "\n";
 	
 	my %sysname = ();
+	my %usr     = ();
 	
 	my $count = 0;
 	open(FH,'<',$file);
@@ -62,24 +63,29 @@ sub pluginmain {
 			$count = 1;
 			
 			if ($id eq "4720") {
-				printf "%-20s  %-40s\n",::format8601Date($tags[0])."Z", $elements[0]." user account created";
+#				printf "%-20s  %-40s\n",::format8601Date($tags[0])."Z", $elements[0]." user account created";
+				push(@{$usr{$tags[0]}}, $elements[0]." user account created");
 			}
 			
 			if ($id eq "4722") {
-				printf "%-20s  %-40s\n",::format8601Date($tags[0])."Z", $elements[0]." user account enabled";
+#				printf "%-20s  %-40s\n",::format8601Date($tags[0])."Z", $elements[0]." user account enabled";
+				push(@{$usr{$tags[0]}}, $elements[0]." user account enabled");
 			}
 			
 			if ($id eq "4724") {
-				printf "%-20s  %-40s\n",::format8601Date($tags[0])."Z", "attempt to reset ".$elements[0]." account password";
+#				printf "%-20s  %-40s\n",::format8601Date($tags[0])."Z", "attempt to reset ".$elements[0]." account password";
+				push(@{$usr{$tags[0]}}, "attempt to reset ".$elements[0]." user password");
 			}
 			
 			if ($id eq "4726") {
-				printf "%-20s  %-40s\n",::format8601Date($tags[0])."Z", $elements[0]." account deleted";
+#				printf "%-20s  %-40s\n",::format8601Date($tags[0])."Z", $elements[0]." account deleted";
+				push(@{$usr{$tags[0]}}, $elements[0]." user account deleted");
 			}
 			
-#			if ($id eq "4732") {
+			if ($id eq "4732") {
 #				printf "%-20s  %-40s\n",::format8601Date($tags[0])."Z", $elements[0]." user added to security-enabled local group";
-#			}
+				push(@{$usr{$tags[0]}}, $elements[0]." user added to security-enabled local group");
+			}
 						
 		}
 	}
@@ -92,6 +98,18 @@ sub pluginmain {
 		print "\n";
 	}
 	
-	print "No Security-Auditing events found.\n" if ($count == 0);
+	if (scalar (keys %usr) > 0) {
+		print "\n";
+		print "User Account Events:\n";
+		printf "%-25s %-60s\n","Time","Description";
+		foreach my $i (reverse sort keys %usr) {
+			foreach my $x (@{$usr{$i}}) {
+				printf "%-25s %-60s\n",::format8601Date($i)."Z",$x;
+			}
+		}	
+	}	
+	else {
+		print "No user account events found.\n";	
+	}
 }
 1;
