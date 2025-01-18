@@ -6,6 +6,7 @@
 # session ID.
 #
 # Change history:
+#   20241231 - added display of "orphaned" logins
 #   20241106 - added workstation name/IP addr to output
 #   20230307 - updated to include type 9 logins
 #   20220930 - updated to output system name
@@ -22,7 +23,7 @@
 package sessions;
 use strict;
 
-my %config = (version       => 20241106,
+my %config = (version       => 20241231,
               category      => "",
               MITRE         => "");
 
@@ -42,8 +43,9 @@ sub pluginmain {
 	print getShortDescr()."\n";
 	print "\n";
 	
-	my %sess = ();
-	my %list = ();
+	my %sess    = ();
+	my %list    = ();
+	my %orphan  = ();
 	my %sysname = ();
 	
 	open(FH,'<',$file);
@@ -95,7 +97,26 @@ sub pluginmain {
 		}
 		print "\n";
 	}
-	
+#---------- update 20241231 -- get orphaned logons
+	if (scalar (keys %sess) > 0) {
+		foreach my $i (keys %sess) {
+			if (exists $sess{$i}{logon_time} && not exists $sess{$i}{logoff_time}) {
+				next if ($sess{$i}{logon_user} =~ m/\$$/);
+				next if ($sess{$i}{logon_type} == 2);
+				push(@{$orphan{$sess{$i}{logon_time}}},$sess{$i}{logon_user}."|".$sess{$i}{logon_type}."|".$sess{$i}{logon_NetBIOS}."/".$sess{$i}{logon_IP});
+			}
+		}
+		print "Orphaned Logins:\n";
+		printf "%-25s %-40s %-4s %-40s\n","Login Time","User","Type","Wrkstn/IP";
+		foreach my $n (reverse sort {$a <=> $b} keys %orphan) {
+			foreach my $x (@{$orphan{$n}}) {
+				my @str = split(/\|/,$x);
+				printf "%-25s %-40s %-4s %-40s\n",::format8601Date($n)."Z", $str[0],$str[1],$str[2];
+			}
+		}
+		print "\n";	
+	}
+#----------
 	if (scalar (keys %sess) > 0) {
 		
 		foreach my $i (keys %sess) {
@@ -105,24 +126,15 @@ sub pluginmain {
 				"|".$sess{$i}{logon_NetBIOS}."/".$sess{$i}{logon_IP});
 			}
 		}
-		
+		print "Logon Sessions:\n";
 		printf "%-25s %-40s %-4s %-10s %-40s\n","Login Time","User","Type","Duration","Wrkstn/IP";
 		foreach my $n (reverse sort {$a <=> $b} keys %list) {
 			foreach my $x (@{$list{$n}}) {
 				my @str = split(/\|/,$x);
-#				print $n." - ".$x."\n";
 				printf "%-25s %-40s %-4s %-10s %-40s\n",::format8601Date($n)."Z", $str[0],$str[1],$str[2],$str[3];
 			}
 		}
 		
-#		printf "%-25s %-40s %-4s %-10s\n","Login Time","User","Type","Duration";
-#		foreach my $i (keys %sess) {
-#			if (exists $sess{$i}{logon_time} && exists $sess{$i}{logoff_time}) {
-#				print "ID  : ".$i."\n";
-#				next if ($sess{$i}{logon_user} =~ m/\$$/);
-#				printf "%-25s %-40s %-4s %-10s\n",::format8601Date($sess{$i}{logon_time})."Z", $sess{$i}{logon_user},$sess{$i}{logon_type},parse_duration($sess{$i}{logoff_time} - $sess{$i}{logon_time});
-#			}
-#		}
 	}
 	else {
 		print "\n";
@@ -132,7 +144,9 @@ sub pluginmain {
 	print "Analysis Tip: This plugin correlates Security-Auditing event ID 4624 and 4634 records, *by logon ID*, to track\n";
 	print "logon session durations. Account names that end in \"\$\" are not tracked; this is done to reduce the volume of\n";
 	print "output.\n";
-	
+	print "\n";
+	print "Orphaned logins - those login events without a corresponding logoff event, based on correlation by logon ID - are\n";
+	print "displayed separately.\n";
 }
 
 # found this code on PerlMonks

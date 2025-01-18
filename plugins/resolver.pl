@@ -4,6 +4,7 @@
 #
 # 
 # Change history:
+#   20241123 - updated detections
 #   20241108 - created
 #
 # References:
@@ -16,7 +17,7 @@
 package resolver;
 use strict;
 
-my %config = (version       => 20241108,
+my %config = (version       => 20241123,
               category      => "",
               MITRE         => "");
 
@@ -58,6 +59,16 @@ sub pluginmain {
 			if ($name eq "AnyDesk" && $id eq "prokzult ad") {
 				push(@{$detect{$tags[0]}}, "Possible malicious ".$name.":".$id." installed");	
 			}
+			elsif ($name eq "PuTTY" && $id eq "SimonTatham.PuTTY") {
+				push(@{$detect{$tags[0]}}, $name.":".$id." installed");	
+			}
+			elsif ($name eq "Advanced IP Scanner") {
+				push(@{$detect{$tags[0]}}, $name." installed");	
+			}
+			elsif ($name eq "Splashtop Streamer") {
+				push(@{$detect{$tags[0]}}, $name." installed");	
+			}
+			
 			push(@{$resolv{$tags[0]}}, $name.":".$id);
 		}
 		else {}

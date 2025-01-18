@@ -8,6 +8,7 @@
 #
 #
 # Change history:
+#   20250114 - updated output of detection events
 #   20240807 - updated to include feature disabled events
 #   20240610 - added event ID 1119 parsing, extracted files from 1116/1117/1119 events
 #   20240112 - added event ID 5013 parsing
@@ -17,13 +18,13 @@
 # References:
 #   https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/troubleshoot-microsoft-defender-antivirus?view=o365-worldwide
 #
-# copyright 2024 Quantum Analytics Research, LLC
+# copyright 2025 Quantum Analytics Research, LLC
 # author: H. Carvey, keydet89@yahoo.com
 #-----------------------------------------------------------
 package defender;
 use strict;
 
-my %config = (version       => 20240807,
+my %config = (version       => 20250114,
               category      => "",
               MITRE         => "");
 
@@ -67,7 +68,7 @@ sub pluginmain {
 			if ($id eq "1116" || $id eq "1117") {
 		
 				my @s = split(/,/,$str);
-				$detections{$tags[0]} = $id.": ".$s[7];
+				push(@{$detections{$tags[0]}},$id.": ".$s[7]);
 				$files_1116{$s[21]} = 1;
 			
 			}
@@ -111,6 +112,9 @@ sub pluginmain {
 			elsif ($id eq "5012") {
 				$disabled{$tags[0]}{"MALWAREPROTECTION_ANTIVIRUS_DISABLED"} = 1;
 			}
+			elsif ($id eq "5010") {
+				$disabled{$tags[0]}{"MALWAREPROTECTION_ANTISPYWARE_DISABLED"} = 1;
+			}
 			else {}
 		}
 	}
@@ -125,11 +129,13 @@ sub pluginmain {
 	
 	if (scalar (keys %detections) > 0) {
 		
-		foreach my $n (reverse sort {$a <=> $b} keys %detections) {
-			printf "%-25s %-10s\n",::format8601Date($n)."Z",$detections{$n},
-			
+		print "Detection Events:\n";
+		printf "%-25s %-60s\n","Time","Detection";
+		foreach my $i (reverse sort keys %detections) {
+			foreach my $x (@{$detections{$i}}) {
+				printf "%-25s %-60s\n",::format8601Date($i)."Z",$x;
+			}
 		}
-
 		print "\n";
 		print "Analysis Tip: Defender/1116 & 1117 events are generated when Windows Defender detects/takes action on malware\.\n\n";
 		print "Microsoft-Windows-Windows Defender/1116 - malware detected\n";
@@ -144,7 +150,7 @@ sub pluginmain {
 		}
 	}
 	else {
-		print "No Defender/1116, 1117 detection events found\.\n";
+		print "No Defender/1116, ../1117 detection events found\.\n";
 	}
 	
 	print "\n";
@@ -204,7 +210,7 @@ sub pluginmain {
 		print "Files that could not be sent by WinDefend:\n";
 		foreach my $i (keys %files) {
 			my @f = split(/\|/,$i,3);
-			printf "%-25s %-50s SHA-256: %-40s\n",$f[0],$f[1],$f[2];
+			printf "%-25s %-50s SHA-256: %-40s\n",::format8601Date($f[0])."Z",$f[1],$f[2];
 		}
 		print "\n";
 		print "Analysis Tip: Defender/2051 events are generated when Defender is unable to upload a sample for categorization\.\n";

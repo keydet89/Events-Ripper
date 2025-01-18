@@ -8,6 +8,7 @@
 #
 #
 # Change history:
+#   20250114 - removed Windows Defender updates from service installation events
 #   20241025 - updated to print SCM/7045 events in reverse order
 #   20230802 - added /7031 service crash events
 #   20230503 - created
@@ -16,13 +17,13 @@
 #   https://social.technet.microsoft.com/wiki/contents/articles/13754.event-id-7024-service-terminated.aspx
 #   Event ID 7040 -  https://www.linkedin.com/posts/john-dwyer-xforce_threathunting-threatdetection-malware-activity-7038997228815867904-F8wj
 #
-# copyright 2024 Quantum Analytics Research, LLC
+# copyright 2025 Quantum Analytics Research, LLC
 # author: H. Carvey, keydet89@yahoo.com
 #-----------------------------------------------------------
 package scm;
 use strict;
 
-my %config = (version       => 20241025,
+my %config = (version       => 20250114,
               category      => "",
               MITRE         => "");
 
@@ -85,6 +86,7 @@ sub pluginmain {
 			}
 			elsif ($id eq "7045") {
 				my @s = split(/,/,$str);
+				next if ($s[0] =~ m/^MpKs/);
 				my $app = $s[0]." -> ".$s[1];
 				push(@{$i7045{$tags[0]}}, $app);
 				
@@ -170,7 +172,7 @@ sub pluginmain {
 		}
 		print "\n";
 		print "Analysis Tip: A service installation may indicate persistence being created for malware, or as part of\n";
-		print "an attack.\n";
+		print "an attack. Note: Service installation events for updates to Windows Defender are *not* displayed.\n";
 		
 	}
 	else {
